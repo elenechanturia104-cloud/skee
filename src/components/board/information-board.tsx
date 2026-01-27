@@ -38,7 +38,7 @@ export function InformationBoard() {
                         <h2 className="font-headline text-3xl md:text-5xl font-bold text-primary leading-tight">
                             {item.title}
                         </h2>
-                        <p className="mt-4 text-lg text-foreground/80 leading-relaxed">
+                        <p className="mt-4 text-lg md:text-xl text-foreground/80 leading-relaxed">
                             {item.description}
                         </p>
                     </div>

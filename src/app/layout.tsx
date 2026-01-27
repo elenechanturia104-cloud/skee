@@ -16,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="stylesheet" href="https://fonts.ge/css/bpg-nino-mtavruli.css" />
       </head>
       <body className="font-body antialiased">
         <ChronoBoardProviders>
