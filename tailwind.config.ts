@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['"Space Grotesk"', 'sans-serif'],
+        body: ['"BPG Nino Mtavruli"', 'sans-serif'],
+        headline: ['"BPG Nino Mtavruli"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
