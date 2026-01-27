@@ -12,16 +12,16 @@ export default function AdminPage() {
       <Tabs defaultValue="content">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="content">
-            <LayoutDashboard className="mr-2 h-4 w-4" /> Board Content
+            <LayoutDashboard className="mr-2 h-4 w-4" /> დაფის შიგთავსი
           </TabsTrigger>
           <TabsTrigger value="schedule">
-            <CalendarClock className="mr-2 h-4 w-4" /> Schedule
+            <CalendarClock className="mr-2 h-4 w-4" /> განრიგი
           </TabsTrigger>
           <TabsTrigger value="appearance">
-            <Palette className="mr-2 h-4 w-4" /> Appearance
+            <Palette className="mr-2 h-4 w-4" /> გარეგნობა
           </TabsTrigger>
           <TabsTrigger value="logs">
-            <History className="mr-2 h-4 w-4" /> Log History
+            <History className="mr-2 h-4 w-4" /> ცვლილებების ისტორია
           </TabsTrigger>
         </TabsList>
         <TabsContent value="content">

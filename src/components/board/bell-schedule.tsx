@@ -49,7 +49,7 @@ export function BellSchedule() {
       }
 
       const activeLesson = schedule.find(item => item.id === currentLesson);
-      const isBreak = activeLesson ? activeLesson.name.toLowerCase().includes('break') : false;
+      const isBreak = activeLesson ? activeLesson.name.toLowerCase().includes('break') || activeLesson.name.toLowerCase().includes('დასვენება') : false;
       setIsBreakTime(isBreak);
 
       setActiveLessonId(currentLesson);
@@ -88,7 +88,7 @@ export function BellSchedule() {
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
           <ChronoBoardLogo className="h-8 w-8 text-primary" />
-          <CardTitle className="font-headline text-2xl tracking-tight">ChronoBoard</CardTitle>
+          <CardTitle className="font-headline text-2xl tracking-tight">ქრონო-დაფა</CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleSound}>
           {settings.soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
@@ -102,8 +102,8 @@ export function BellSchedule() {
           <p className="text-sm text-muted-foreground">{currentTime.toDateString()}</p>
         </div>
         <ScrollArea className="flex-grow">
-          <div className="p-4">
-            {schedule.map((item, index) => {
+          <div className="p-4 space-y-2">
+            {schedule.map((item) => {
               const isActive = item.id === activeLessonId;
               return (
                 <React.Fragment key={item.id}>
@@ -122,7 +122,6 @@ export function BellSchedule() {
                       </div>
                     </div>
                   </div>
-                  {index < schedule.length - 1 && <Separator className="my-3" />}
                 </React.Fragment>
               );
             })}

@@ -25,9 +25,9 @@ import { BoardItem } from '@/lib/types';
 import Image from 'next/image';
 
 const contentSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  imageUrl: z.string().url('Must be a valid URL'),
+  title: z.string().min(1, 'სათაური სავალდებულოა'),
+  description: z.string().min(1, 'აღწერა სავალდებულოა'),
+  imageUrl: z.string().url('უნდა იყოს ვალიდური URL'),
   imageHint: z.string().optional(),
 });
 
@@ -47,8 +47,8 @@ function ContentForm({ item, onSave }: { item?: BoardItem; onSave: (data: BoardI
   const onSubmit = (data: ContentFormValues) => {
     onSave({ ...data, id: item?.id || new Date().getTime().toString() });
     toast({
-      title: `Content ${item ? 'Updated' : 'Added'}`,
-      description: 'The information board has been updated.',
+      title: `შიგთავსი ${item ? 'განახლდა' : 'დაემატა'}`,
+      description: 'საინფორმაციო დაფა განახლდა.',
     });
     setOpen(false);
     if (!item) {
@@ -62,38 +62,38 @@ function ContentForm({ item, onSave }: { item?: BoardItem; onSave: (data: BoardI
         {item ? (
           <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
         ) : (
-          <Button><PlusCircle className="mr-2 h-4 w-4" /> Add New Content</Button>
+          <Button><PlusCircle className="mr-2 h-4 w-4" /> ახალი შიგთავსის დამატება</Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="font-headline">{item ? 'Edit' : 'Add'} Content</DialogTitle>
+          <DialogTitle className="font-headline">{item ? 'რედაქტირება' : 'დამატება'} შიგთავსი</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField control={form.control} name="title" render={({ field }) => (
-                        <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>სათაური</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="description" render={({ field }) => (
-                        <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>აღწერა</FormLabel><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="imageUrl" render={({ field }) => (
-                        <FormItem><FormLabel>Image URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>სურათის მისამართი</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="imageHint" render={({ field }) => (
-                        <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. team meeting" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>მინიშნება სურათისთვის (AI-სთვის)</FormLabel><FormControl><Input placeholder="მაგ: გუნდის შეხვედრა" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <DialogFooter className="pt-4">
-                    <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                    <Button type="submit">Save</Button>
+                    <DialogClose asChild><Button type="button" variant="secondary">გაუქმება</Button></DialogClose>
+                    <Button type="submit">შენახვა</Button>
                     </DialogFooter>
                 </form>
                 </Form>
             </div>
             <div className="flex flex-col gap-2">
-                <h4 className="font-medium text-center text-sm text-muted-foreground">Live Preview</h4>
+                <h4 className="font-medium text-center text-sm text-muted-foreground">პირდაპირი გადახედვა</h4>
                 <Card className="overflow-hidden shadow-lg w-full">
                     <div className="grid grid-cols-1">
                         <div className="relative h-48 bg-muted">
@@ -106,16 +106,16 @@ function ContentForm({ item, onSave }: { item?: BoardItem; onSave: (data: BoardI
                                 />
                             ) : (
                                 <div className="h-full w-full flex items-center justify-center">
-                                    <p className="text-muted-foreground text-xs p-4 text-center">A valid image URL will be shown here</p>
+                                    <p className="text-muted-foreground text-xs p-4 text-center">ვალიდური სურათის მისამართი აქ გამოჩნდება</p>
                                 </div>
                             )}
                         </div>
                         <div className="p-6 flex flex-col justify-center">
                             <h2 className="font-headline text-2xl font-bold text-primary leading-tight">
-                                {watchedValues.title || 'Your Title'}
+                                {watchedValues.title || 'თქვენი სათაური'}
                             </h2>
                             <p className="mt-2 text-base text-foreground/80 leading-relaxed">
-                                {watchedValues.description || 'Your description will appear here.'}
+                                {watchedValues.description || 'თქვენი აღწერა აქ გამოჩნდება.'}
                             </p>
                         </div>
                     </div>
@@ -138,10 +138,10 @@ export function ContentManager() {
       const newItems = [...boardItems];
       newItems[existingIndex] = data;
       setBoardItems(newItems);
-      addLog('Content Updated', `Edited item "${data.title}".`);
+      addLog('შიგთავსი განახლდა', `რედაქტირდა "${data.title}".`);
     } else {
       setBoardItems([...boardItems, data]);
-      addLog('Content Added', `Added new item "${data.title}".`);
+      addLog('შიგთავსი დაემატა', `დაემატა ახალი ერთეული "${data.title}".`);
     }
   };
 
@@ -149,10 +149,10 @@ export function ContentManager() {
     const itemToDelete = boardItems.find((item) => item.id === id);
     setBoardItems(boardItems.filter(item => item.id !== id));
     if (itemToDelete) {
-        addLog('Content Deleted', `Deleted item "${itemToDelete.title}".`);
+        addLog('შიგთავსი წაიშალა', `წაიშალა ერთეული "${itemToDelete.title}".`);
     }
     toast({
-      title: 'Content Deleted',
+      title: 'შიგთავსი წაიშალა',
       variant: 'destructive',
     });
   };
@@ -161,8 +161,8 @@ export function ContentManager() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="font-headline">Content Management</CardTitle>
-          <CardDescription>Manage the slides on the information board.</CardDescription>
+          <CardTitle className="font-headline">შიგთავსის მართვა</CardTitle>
+          <CardDescription>საინფორმაციო დაფაზე სლაიდების მართვა.</CardDescription>
         </div>
         <ContentForm onSave={handleSave} />
       </CardHeader>
@@ -182,7 +182,7 @@ export function ContentManager() {
             </div>
           </Card>
         ))}
-        {boardItems.length === 0 && <p className="text-center text-muted-foreground py-8">No content items yet. Add one to get started!</p>}
+        {boardItems.length === 0 && <p className="text-center text-muted-foreground py-8">ჯერ არ არის შიგთავსი. დასაწყებად დაამატეთ ერთი!</p>}
       </CardContent>
     </Card>
   );

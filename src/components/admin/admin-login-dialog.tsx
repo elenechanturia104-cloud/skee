@@ -20,7 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 
 const pinSchema = z.object({
-  pin: z.string().min(4, 'PIN must be 4 digits').max(4, 'PIN must be 4 digits'),
+  pin: z.string().min(4, 'პინ-კოდი უნდა შედგებოდეს 4 ციფრისგან').max(4, 'პინ-კოდი უნდა შედგებოდეს 4 ციფრისგან'),
 });
 
 type PinFormValues = z.infer<typeof pinSchema>;
@@ -43,8 +43,8 @@ export function AdminLoginDialog({ children, open, onOpenChange }: AdminLoginDia
     if (!login(data.pin)) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: 'The PIN you entered is incorrect.',
+        title: 'ავტორიზაცია ვერ მოხერხდა',
+        description: 'თქვენ მიერ შეყვანილი პინ-კოდი არასწორია.',
       });
       form.reset();
     } else {
@@ -57,8 +57,8 @@ export function AdminLoginDialog({ children, open, onOpenChange }: AdminLoginDia
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">Admin Access</DialogTitle>
-          <DialogDescription>Enter the 4-digit PIN to access the admin panel.</DialogDescription>
+          <DialogTitle className="font-headline">ადმინისტრატორის წვდომა</DialogTitle>
+          <DialogDescription>შეიყვანეთ 4-ნიშნა პინ-კოდი ადმინისტრირების პანელზე წვდომისთვის.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -67,7 +67,7 @@ export function AdminLoginDialog({ children, open, onOpenChange }: AdminLoginDia
               name="pin"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>PIN</FormLabel>
+                  <FormLabel>პინ-კოდი</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
@@ -83,7 +83,7 @@ export function AdminLoginDialog({ children, open, onOpenChange }: AdminLoginDia
             />
             <DialogFooter>
               <Button type="submit" className="w-full">
-                Unlock
+                განბლოკვა
               </Button>
             </DialogFooter>
           </form>

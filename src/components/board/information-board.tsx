@@ -14,8 +14,8 @@ export function InformationBoard() {
         <div className="flex h-full w-full items-center justify-center bg-background p-8">
             <Card className="w-full max-w-4xl">
                 <CardContent className="p-10 text-center">
-                    <h2 className="text-2xl font-headline font-semibold text-muted-foreground">No Information to Display</h2>
-                    <p className="text-muted-foreground mt-2">The administrator has not added any content to the board yet.</p>
+                    <h2 className="text-2xl font-headline font-semibold text-muted-foreground">საჩვენებელი ინფორმაცია არ არის</h2>
+                    <p className="text-muted-foreground mt-2">ადმინისტრატორს ჯერ არ დაუმატებია შიგთავსი დაფაზე.</p>
                 </CardContent>
             </Card>
         </div>

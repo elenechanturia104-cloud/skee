@@ -25,17 +25,17 @@ export function LogViewer() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Admin Log History</CardTitle>
-        <CardDescription>A record of changes made in the admin panel.</CardDescription>
+        <CardTitle className="font-headline">ადმინის ცვლილებების ისტორია</CardTitle>
+        <CardDescription>ადმინისტრირების პანელში განხორციელებული ცვლილებების ჩანაწერი.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px]">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Timestamp</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead className="w-[200px]">დრო</TableHead>
+                <TableHead>მოქმედება</TableHead>
+                <TableHead>დეტალები</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -50,7 +50,7 @@ export function LogViewer() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} className="h-24 text-center">
-                    No logs yet.
+                    ჩანაწერები ჯერ არ არის.
                   </TableCell>
                 </TableRow>
               )}
@@ -62,19 +62,19 @@ export function LogViewer() {
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={logs.length === 0}>
-                <Trash2 className="mr-2 h-4 w-4" /> Clear Logs
+                <Trash2 className="mr-2 h-4 w-4" /> ისტორიის გასუფთავება
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogTitle>დარწმუნებული ხართ?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete all log entries.
+                ამ მოქმედების გაუქმება შეუძლებელია. ეს სამუდამოდ წაშლის ყველა ჩანაწერს.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={clearLogs}>Continue</AlertDialogAction>
+              <AlertDialogCancel>გაუქმება</AlertDialogCancel>
+              <AlertDialogAction onClick={clearLogs}>გაგრძელება</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

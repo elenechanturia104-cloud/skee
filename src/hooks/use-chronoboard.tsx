@@ -121,8 +121,8 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     const newLog: AdminLog = {
         id: new Date().getTime().toString(),
         timestamp: new Date().toISOString(),
-        action: 'Logs',
-        details: 'Log history cleared.',
+        action: 'ისტორია',
+        details: 'ცვლილებების ისტორია გასუფთავდა.',
       };
       setLogs([newLog]);
   };
@@ -135,7 +135,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   const login = (pin: string) => {
     if (pin === ADMIN_PIN) {
       setIsAuthenticated(true);
-      addLog('Authentication', 'Admin logged in.');
+      addLog('ავტორიზაცია', 'ადმინისტრატორი შემოვიდა.');
       router.push('/admin');
       return true;
     }
@@ -143,7 +143,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    addLog('Authentication', 'Admin logged out.');
+    addLog('ავტორიზაცია', 'ადმინისტრატორი გავიდა.');
     setIsAuthenticated(false);
     router.push('/');
   };

@@ -93,37 +93,37 @@ export function AppearanceManager() {
   }
 
   const handleSaveChanges = () => {
-    addLog('Appearance Updated', 'New appearance settings saved.');
+    addLog('გარეგნობა განახლდა', 'გარეგნობის ახალი პარამეტრები შეინახა.');
     toast({
-        title: 'Appearance Saved',
-        description: 'Your new appearance settings have been applied.',
+        title: 'გარეგნობა შენახულია',
+        description: 'თქვენი გარეგნობის ახალი პარამეტრები გამოყენებულია.',
     });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Appearance & Sound</CardTitle>
-        <CardDescription>Customize the look and feel of the board.</CardDescription>
+        <CardTitle className="font-headline">გარეგნობა და ხმა</CardTitle>
+        <CardDescription>დაფის იერსახისა და შეგრძნებების მორგება.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-            <h4 className="font-medium">Colors</h4>
-            <ColorInput label="Primary" value={settings.colors.primary} onChange={handleColorChange('primary')} />
-            <ColorInput label="Background" value={settings.colors.background} onChange={handleColorChange('background')} />
-            <ColorInput label="Accent" value={settings.colors.accent} onChange={handleColorChange('accent')} />
+            <h4 className="font-medium">ფერები</h4>
+            <ColorInput label="მთავარი" value={settings.colors.primary} onChange={handleColorChange('primary')} />
+            <ColorInput label="ფონი" value={settings.colors.background} onChange={handleColorChange('background')} />
+            <ColorInput label="აქცენტი" value={settings.colors.accent} onChange={handleColorChange('accent')} />
         </div>
         <div className="space-y-4">
-            <h4 className="font-medium">Sound</h4>
+            <h4 className="font-medium">ხმა</h4>
             <div className="flex items-center justify-between">
-                <Label htmlFor="sound-enabled">Enable Bell Sound</Label>
+                <Label htmlFor="sound-enabled">ზარის ხმის ჩართვა</Label>
                 <Switch id="sound-enabled" checked={settings.soundEnabled} onCheckedChange={handleSoundToggle} />
             </div>
             <div className="flex items-center justify-between">
-                <Label htmlFor="sound-preset">Bell Sound Preset</Label>
+                <Label htmlFor="sound-preset">ზარის ხმის პარამეტრი</Label>
                 <Select value={settings.bellSound} onValueChange={handleSoundPresetChange}>
                     <SelectTrigger id="sound-preset" className="w-[180px]">
-                        <SelectValue placeholder="Select a sound" />
+                        <SelectValue placeholder="აირჩიეთ ხმა" />
                     </SelectTrigger>
                     <SelectContent>
                         {Object.entries(bellSounds).map(([key, { name }]) => (
@@ -137,12 +137,12 @@ export function AppearanceManager() {
       <CardFooter className="flex justify-between">
         <Button variant="ghost" onClick={() => {
             resetColorSettings();
-            addLog('Appearance Reset', 'Colors reset to default.');
-            toast({ title: 'Colors Reset', description: 'The colors have been reset to their defaults.'});
+            addLog('გარეგნობა აღდგა', 'ფერები დაბრუნდა საწყის მდგომარეობაში.');
+            toast({ title: 'ფერები აღდგენილია', description: 'ფერები დაუბრუნდა თავდაპირველ მნიშვნელობებს.'});
         }}>
-            <Undo className="mr-2 h-4 w-4" /> Reset Colors
+            <Undo className="mr-2 h-4 w-4" /> ფერების აღდგენა
         </Button>
-        <Button onClick={handleSaveChanges}>Save Changes</Button>
+        <Button onClick={handleSaveChanges}>ცვლილებების შენახვა</Button>
       </CardFooter>
     </Card>
   );

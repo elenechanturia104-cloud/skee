@@ -16,9 +16,9 @@ const scheduleSchema = z.object({
   schedule: z.array(
     z.object({
       id: z.string(),
-      name: z.string().min(1, 'Name is required'),
-      startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
-      endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+      name: z.string().min(1, 'სახელი სავალდებულოა'),
+      startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'დროის არასწორი ფორმატი (სს:წთ)'),
+      endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'დროის არასწორი ფორმატი (სს:წთ)'),
     })
   ),
 });
@@ -45,17 +45,17 @@ export function ScheduleManager() {
     // Sort by start time before saving
     const sortedSchedule = [...data.schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
     setSchedule(sortedSchedule);
-    addLog('Schedule Updated', `Saved ${sortedSchedule.length} schedule items.`);
+    addLog('განრიგი განახლდა', `შენახულია ${sortedSchedule.length} ერთეული.`);
     toast({
-      title: 'Schedule Saved',
-      description: 'The bell schedule has been updated successfully.',
+      title: 'განრიგი შენახულია',
+      description: 'ზარის განრიგი წარმატებით განახლდა.',
     });
   };
 
   const addNewItem = () => {
     append({
         id: new Date().getTime().toString(),
-        name: 'New Lesson',
+        name: 'ახალი გაკვეთილი',
         startTime: '00:00',
         endTime: '00:00',
     });
@@ -64,8 +64,8 @@ export function ScheduleManager() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Schedule Management</CardTitle>
-        <CardDescription>Add, edit, or remove bell schedule times.</CardDescription>
+        <CardTitle className="font-headline">განრიგის მართვა</CardTitle>
+        <CardDescription>ზარის განრიგის დროების დამატება, რედაქტირება ან წაშლა.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -74,10 +74,10 @@ export function ScheduleManager() {
                 <Table>
                 <TableHeader>
                     <TableRow>
-                    <TableHead>Lesson Name</TableHead>
-                    <TableHead>Start Time</TableHead>
-                    <TableHead>End Time</TableHead>
-                    <TableHead className="text-right w-[100px]">Actions</TableHead>
+                    <TableHead>გაკვეთილის სახელი</TableHead>
+                    <TableHead>დაწყების დრო</TableHead>
+                    <TableHead>დასრულების დრო</TableHead>
+                    <TableHead className="text-right w-[100px]">მოქმედებები</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -110,9 +110,9 @@ export function ScheduleManager() {
             </div>
             <div className="mt-4 flex justify-between">
                 <Button variant="outline" type="button" onClick={addNewItem}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+                    <PlusCircle className="mr-2 h-4 w-4" /> ერთეულის დამატება
                 </Button>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">ცვლილებების შენახვა</Button>
             </div>
           </form>
         </Form>
