@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "ai-training",
+      "description": "A person pointing at a screen with AI-related graphics.",
+      "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBSSUyMHRyYWluaW5nfGVufDB8fHx8MTc2OTUxNTEwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "AI training"
+    },
+    {
+      "id": "team-meeting",
+      "description": "A group of people in a modern office having a meeting.",
+      "imageUrl": "https://images.unsplash.com/photo-1622675363311-3e1904dc1885?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwbWVldGluZ3xlbnwwfHx8fDE3Njk0MTQ3NDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team meeting"
+    },
+    {
+      "id": "new-product",
+      "description": "A shiny new gadget on a clean background.",
+      "imageUrl": "https://images.unsplash.com/photo-1706759755851-6163305080f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxuZXclMjBwcm9kdWN0fGVufDB8fHx8MTc2OTUxNTEwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "new product"
+    },
+    {
+      "id": "company-event",
+      "description": "People celebrating at a company event.",
+      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb21wYW55JTIwZXZlbnR8ZW58MHx8fHwxNzY5NDUwNzA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "company event"
+    }
+  ]
 }
