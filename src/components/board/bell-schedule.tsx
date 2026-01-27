@@ -32,7 +32,7 @@ export function BellSchedule() {
   }, []);
 
   useEffect(() => {
-    if (!currentTime) {
+    if (!currentTime || !isClient) {
         return;
     }
     
@@ -145,7 +145,7 @@ export function BellSchedule() {
       setTimeout(() => setIsRinging(false), 5000);
     }
 
-  }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime]);
+  }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime, isClient]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -188,7 +188,7 @@ export function BellSchedule() {
         )}
 
         <ScrollArea className="flex-grow">
-          <div className="p-4 space-y-2">
+          <div className="px-4 pt-0 pb-4 space-y-2">
             {schedule.map((item) => {
               const isActive = item.id === activeLessonId;
               return (
