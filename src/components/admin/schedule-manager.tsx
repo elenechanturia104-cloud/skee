@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Trash2, PlusCircle } from 'lucide-react';
+import { Trash2, PlusCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,16 +36,14 @@ export function ScheduleManager() {
     },
   });
   
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: 'schedule',
   });
 
   const onSubmit = (data: ScheduleFormValues) => {
-    // Sort by start time before saving
-    const sortedSchedule = [...data.schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    setSchedule(sortedSchedule);
-    addLog('განრიგი განახლდა', `შენახულია ${sortedSchedule.length} ერთეული.`);
+    setSchedule(data.schedule);
+    addLog('განრიგი განახლდა', `შენახულია ${data.schedule.length} ერთეული.`);
     toast({
       title: 'განრიგი შენახულია',
       description: 'ზარის განრიგი წარმატებით განახლდა.',
@@ -65,7 +63,7 @@ export function ScheduleManager() {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">განრიგის მართვა</CardTitle>
-        <CardDescription>ზარის განრიგის დროების დამატება, რედაქტირება ან წაშლა.</CardDescription>
+        <CardDescription>ზარის განრიგის დროების დამატება, რედაქტირება, წაშლა და გადაადგილება.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -77,7 +75,7 @@ export function ScheduleManager() {
                     <TableHead>გაკვეთილის სახელი</TableHead>
                     <TableHead>დაწყების დრო</TableHead>
                     <TableHead>დასრულების დრო</TableHead>
-                    <TableHead className="text-right w-[100px]">მოქმედებები</TableHead>
+                    <TableHead className="text-right w-[150px]">მოქმედებები</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -99,9 +97,15 @@ export function ScheduleManager() {
                         )} />
                         </TableCell>
                         <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" type="button" onClick={() => remove(index)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                          <Button variant="ghost" size="icon" type="button" onClick={() => move(index, index - 1)} disabled={index === 0}>
+                              <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" type="button" onClick={() => move(index, index + 1)} disabled={index === fields.length - 1}>
+                              <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" type="button" onClick={() => remove(index)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </TableCell>
                     </TableRow>
                     ))}
