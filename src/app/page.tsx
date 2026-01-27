@@ -11,11 +11,11 @@ export default function Home() {
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   return (
-    <main className="relative flex h-screen w-full bg-background text-foreground overflow-hidden">
-      <div className="w-full md:w-[35%] lg:w-[30%] h-full flex flex-col border-r border-border/50">
+    <main className="relative flex flex-col md:flex-row h-auto md:h-screen w-full bg-background text-foreground md:overflow-hidden">
+      <div className="w-full md:w-[35%] lg:w-[30%] h-screen md:h-full flex flex-col border-b md:border-b-0 md:border-r border-border/50">
         <BellSchedule />
       </div>
-      <div className="hidden md:flex flex-1 h-full">
+      <div className="w-full md:flex-1 h-screen md:h-full">
         <InformationBoard />
       </div>
 

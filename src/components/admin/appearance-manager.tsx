@@ -44,9 +44,9 @@ const ColorInput = ({ label, value, onChange }: { label: string; value: string; 
     const hexValue = useMemo(() => hslToHex(value), [value]);
 
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Label>{label}</Label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-end sm:self-center">
                 <span className="text-sm text-muted-foreground w-40 truncate">{value}</span>
                 <Input type="color" value={hexValue} onChange={onChange} className="w-12 h-10 p-1" />
             </div>
@@ -115,14 +115,14 @@ export function AppearanceManager() {
         </div>
         <div className="space-y-4">
             <h4 className="font-medium">ხმა</h4>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Label htmlFor="sound-enabled">ზარის ხმის ჩართვა</Label>
                 <Switch id="sound-enabled" checked={settings.soundEnabled} onCheckedChange={handleSoundToggle} />
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Label htmlFor="sound-preset">ზარის ხმის პარამეტრი</Label>
                 <Select value={settings.bellSound} onValueChange={handleSoundPresetChange}>
-                    <SelectTrigger id="sound-preset" className="w-[180px]">
+                    <SelectTrigger id="sound-preset" className="w-full sm:w-[180px]">
                         <SelectValue placeholder="აირჩიეთ ხმა" />
                     </SelectTrigger>
                     <SelectContent>
