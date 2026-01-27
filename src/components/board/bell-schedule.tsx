@@ -175,7 +175,7 @@ export function BellSchedule() {
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
             {isClient && currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{isClient && currentTime ? formatDate(currentTime) : <span>&nbsp;</span>}</p>
+          <p className="text-sm text-muted-foreground">{isClient && currentTime ? formatDate(currentTime) : '\u00a0'}</p>
         </div>
 
         {countdown && (
@@ -188,7 +188,7 @@ export function BellSchedule() {
         )}
 
         <ScrollArea className="flex-grow">
-          <div className="px-4 pt-0 pb-4 space-y-2">
+          <div className="pt-0 pb-4 px-4 space-y-2">
             {schedule.map((item) => {
               const isActive = item.id === activeLessonId;
               return (
