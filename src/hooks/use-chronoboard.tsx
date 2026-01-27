@@ -49,7 +49,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
 
   const [boardItems, setBoardItems] = useState<BoardItem[]>(() => {
     if (typeof window === 'undefined') return initialBoardItems;
-    const saved = localStorage.getItem('chrono-board-items');
+    const saved = localStorage.getItem('chrono-board-items-v2');
     return saved ? JSON.parse(saved) : initialBoardItems;
   });
 
@@ -83,7 +83,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-        localStorage.setItem('chrono-board-items', JSON.stringify(boardItems));
+        localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
     }
   }, [boardItems]);
 
