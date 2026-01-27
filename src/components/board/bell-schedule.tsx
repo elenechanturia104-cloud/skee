@@ -13,7 +13,7 @@ import { ScheduleItem } from '@/lib/types';
 
 export function BellSchedule() {
   const { schedule, settings, setSettings, setIsBreakTime } = useChronoBoard();
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [isRinging, setIsRinging] = useState(false);
   const [synth, setSynth] = useState<Tone.Synth | null>(null);
@@ -22,14 +22,18 @@ export function BellSchedule() {
   useEffect(() => {
     // Initialize synth on client
     setSynth(new Tone.Synth().toDestination());
-  }, []);
-
-  useEffect(() => {
+    
+    // Set time on the client to avoid hydration mismatch
+    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
+    if (!currentTime) {
+        return;
+    }
+
     if (schedule.length === 0) {
         setCountdown(null);
         setActiveLessonId(null);
@@ -162,9 +166,9 @@ export function BellSchedule() {
       <CardContent className="flex flex-col flex-grow p-0">
         <div className="p-4 text-center border-b border-border/50">
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
-            {formatTime(currentTime)}
+            {currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{currentTime.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-sm text-muted-foreground">{currentTime ? currentTime.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
         </div>
 
         {countdown && (
