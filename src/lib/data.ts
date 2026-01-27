@@ -1,13 +1,12 @@
 import type { ScheduleItem, BoardItem } from './types';
 
 export const initialSchedule: ScheduleItem[] = [
-  { id: '1', name: 'Lesson 1', startTime: '08:00', endTime: '08:45' },
-  { id: '2', name: 'Lesson 2', startTime: '09:00', endTime: '09:45' },
-  { id: '3', name: 'Break', startTime: '09:45', endTime: '10:00' },
-  { id: '4', name: 'Lesson 3', startTime: '10:00', endTime: '10:45' },
-  { id: '5', name: 'Lesson 4', startTime: '11:00', endTime: '11:45' },
-  { id: '6', name: 'Lunch', startTime: '11:45', endTime: '12:30' },
-  { id: '7', name: 'Lesson 5', startTime: '12:30', endTime: '13:15' },
+  { id: '1', name: 'Period 1', startTime: '09:00', endTime: '09:45' },
+  { id: '2', name: 'Period 2', startTime: '09:50', endTime: '10:35' },
+  { id: '3', name: 'Break', startTime: '10:35', endTime: '10:50' },
+  { id: '4', name: 'Period 3', startTime: '10:50', endTime: '11:35' },
+  { id: '5', name: 'Lunch', startTime: '11:35', endTime: '12:20' },
+  { id: '6', name: 'Period 4', startTime: '12:20', endTime: '13:05' },
 ];
 
 export const initialBoardItems: BoardItem[] = [

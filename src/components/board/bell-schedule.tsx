@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChronoBoard } from '@/hooks/use-chronoboard';
 import { Bell, Volume2, VolumeX } from 'lucide-react';
 import * as Tone from 'tone';
@@ -102,11 +102,11 @@ export function BellSchedule() {
           <p className="text-sm text-muted-foreground">{currentTime.toDateString()}</p>
         </div>
         <ScrollArea className="flex-grow">
-          <div className="p-4 space-y-4">
+          <div className="p-4">
             {schedule.map((item, index) => {
               const isActive = item.id === activeLessonId;
               return (
-                <div key={item.id}>
+                <React.Fragment key={item.id}>
                   <div
                     className={`flex items-center justify-between p-3 rounded-lg transition-all ${
                       isActive ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted/50'
@@ -122,8 +122,8 @@ export function BellSchedule() {
                       </div>
                     </div>
                   </div>
-                  {index < schedule.length - 1 && <Separator className="mt-4" />}
-                </div>
+                  {index < schedule.length - 1 && <Separator className="my-3" />}
+                </React.Fragment>
               );
             })}
           </div>
