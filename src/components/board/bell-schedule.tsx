@@ -33,17 +33,17 @@ export function BellSchedule() {
     if (!currentTime) {
         return;
     }
+    
+    // Sort schedule for logical operations, but don't change the original order for display
+    const sortedSchedule = [...schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    if (schedule.length === 0) {
+    if (sortedSchedule.length === 0) {
         setCountdown(null);
         setActiveLessonId(null);
         setIsBreakTime(false);
         return;
     }
     
-    // Sort schedule for logical operations, but don't change the original order for display
-    const sortedSchedule = [...schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
-
     const now = currentTime;
     const timeNowStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds();
@@ -145,7 +145,7 @@ export function BellSchedule() {
   }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime]);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return date.toLocaleTimeString('ka', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
   const toggleSound = () => {
@@ -153,7 +153,7 @@ export function BellSchedule() {
   }
 
   return (
-    <Card className="flex flex-col h-full w-full rounded-none border-0 border-r bg-card/50 shadow-none">
+    <Card className="flex flex-col h-full w-full rounded-none border-0 md:border-r bg-card/50 shadow-none">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
           <ChronoBoardLogo className="h-8 w-8 text-primary" />
@@ -168,7 +168,7 @@ export function BellSchedule() {
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
             {currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{currentTime ? currentTime.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
+          <p className="text-sm text-muted-foreground">{currentTime ? currentTime.toLocaleDateString('ka', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
         </div>
 
         {countdown && (
