@@ -68,6 +68,7 @@ export function BellSchedule() {
         }
       }
       if (!nextLesson && sortedSchedule.length > 0) {
+        // If it's past the last lesson, the next one is the first one tomorrow
         nextLesson = sortedSchedule[0];
       }
     }
@@ -147,9 +148,12 @@ export function BellSchedule() {
   }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime]);
 
   const formatTime = (date: Date) => {
-    if (!date) return '00:00:00';
     return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
 
   const toggleSound = () => {
     setSettings(prev => ({...prev, soundEnabled: !prev.soundEnabled}));
@@ -166,12 +170,12 @@ export function BellSchedule() {
           {settings.soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </Button>
       </CardHeader>
-      <CardContent className="flex flex-col flex-grow p-0">
+      <CardContent className="flex flex-col flex-grow p-0 min-h-0">
         <div className="p-4 text-center border-b border-border/50">
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
             {isClient && currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{isClient && currentTime ? currentTime.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
+          <p className="text-sm text-muted-foreground">{isClient && currentTime ? formatDate(currentTime) : <span>&nbsp;</span>}</p>
         </div>
 
         {countdown && (
