@@ -18,8 +18,10 @@ export function BellSchedule() {
   const [isRinging, setIsRinging] = useState(false);
   const [synth, setSynth] = useState<Tone.Synth | null>(null);
   const [countdown, setCountdown] = useState<{ label: string; time: string } | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     // Initialize synth on client
     setSynth(new Tone.Synth().toDestination());
     
@@ -145,7 +147,8 @@ export function BellSchedule() {
   }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime]);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ka', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (!date) return '00:00:00';
+    return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
   const toggleSound = () => {
@@ -166,9 +169,9 @@ export function BellSchedule() {
       <CardContent className="flex flex-col flex-grow p-0">
         <div className="p-4 text-center border-b border-border/50">
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
-            {currentTime ? formatTime(currentTime) : '00:00:00'}
+            {isClient && currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{currentTime ? currentTime.toLocaleDateString('ka', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
+          <p className="text-sm text-muted-foreground">{isClient && currentTime ? currentTime.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : <span>&nbsp;</span>}</p>
         </div>
 
         {countdown && (
