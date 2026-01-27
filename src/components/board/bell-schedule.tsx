@@ -36,6 +36,9 @@ export function BellSchedule() {
         setIsBreakTime(false);
         return;
     }
+    
+    // Sort schedule for logical operations, but don't change the original order for display
+    const sortedSchedule = [...schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     const now = currentTime;
     const timeNowStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
@@ -44,7 +47,7 @@ export function BellSchedule() {
     let activeLesson: ScheduleItem | null = null;
     let nextLesson: ScheduleItem | null = null;
 
-    for (const item of schedule) {
+    for (const item of sortedSchedule) {
       if (timeNowStr >= item.startTime && timeNowStr < item.endTime) {
         activeLesson = item;
         break;
@@ -52,14 +55,14 @@ export function BellSchedule() {
     }
     
     if (!activeLesson) {
-      for (const item of schedule) {
+      for (const item of sortedSchedule) {
         if (item.startTime > timeNowStr) {
           nextLesson = item;
           break;
         }
       }
-      if (!nextLesson && schedule.length > 0) {
-        nextLesson = schedule[0];
+      if (!nextLesson && sortedSchedule.length > 0) {
+        nextLesson = sortedSchedule[0];
       }
     }
 
@@ -110,7 +113,7 @@ export function BellSchedule() {
     // Ringing logic
     let shouldRing = false;
     if (seconds === 0) {
-        for (const item of schedule) {
+        for (const item of sortedSchedule) {
             if (timeNowStr === item.startTime || timeNowStr === item.endTime) {
                 shouldRing = true;
                 break;
