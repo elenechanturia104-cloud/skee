@@ -10,6 +10,8 @@ import { ChronoBoardLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { bellSounds, BellSoundName } from '@/lib/sounds';
 import { ScheduleItem } from '@/lib/types';
+import { format } from 'date-fns';
+import { ka } from 'date-fns/locale';
 
 export function BellSchedule() {
   const { schedule, settings, setSettings, setIsBreakTime } = useChronoBoard();
@@ -148,11 +150,11 @@ export function BellSchedule() {
   }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime, isClient]);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return format(date, 'HH:mm:ss');
   };
   
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ka-GE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return format(date, "EEEE, dd MMMM, yyyy", { locale: ka });
   }
 
   const toggleSound = () => {
@@ -188,7 +190,7 @@ export function BellSchedule() {
         )}
 
         <ScrollArea className="flex-grow">
-          <div className="pt-0 pb-4 px-4 space-y-2">
+          <div className="pb-4 pt-0 px-4 space-y-2">
             {schedule.map((item) => {
               const isActive = item.id === activeLessonId;
               return (
