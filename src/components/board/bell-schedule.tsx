@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { bellSounds, BellSoundName } from '@/lib/sounds';
 
 export function BellSchedule() {
-  const { schedule, settings, setSettings } = useChronoBoard();
+  const { schedule, settings, setSettings, setIsBreakTime } = useChronoBoard();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [isRinging, setIsRinging] = useState(false);
@@ -48,6 +48,10 @@ export function BellSchedule() {
         }
       }
 
+      const activeLesson = schedule.find(item => item.id === currentLesson);
+      const isBreak = activeLesson ? activeLesson.name.toLowerCase().includes('break') : false;
+      setIsBreakTime(isBreak);
+
       setActiveLessonId(currentLesson);
 
       if (shouldRing) {
@@ -69,7 +73,7 @@ export function BellSchedule() {
     };
 
     checkSchedule();
-  }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound]);
+  }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });

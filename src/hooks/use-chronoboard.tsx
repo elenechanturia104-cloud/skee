@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { AppSettings, BoardItem, ScheduleItem } from '@/lib/types';
+import { AppSettings, BoardItem, ScheduleItem, AdminLog } from '@/lib/types';
 import { initialBoardItems, initialSchedule } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
@@ -29,6 +29,11 @@ interface ChronoBoardContextType {
   logout: () => void;
   applyColorSettings: (colors: AppSettings['colors']) => void;
   resetColorSettings: () => void;
+  isBreakTime: boolean;
+  setIsBreakTime: React.Dispatch<React.SetStateAction<boolean>>;
+  logs: AdminLog[];
+  addLog: (action: string, details: string) => void;
+  clearLogs: () => void;
 }
 
 const ChronoBoardContext = createContext<ChronoBoardContextType | undefined>(undefined);
@@ -63,6 +68,12 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [logs, setLogs] = useState<AdminLog[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('chrono-logs');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -90,6 +101,32 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [settings, applyColorSettings]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('chrono-logs', JSON.stringify(logs));
+    }
+  }, [logs]);
+
+  const addLog = (action: string, details: string) => {
+    const newLog: AdminLog = {
+      id: new Date().getTime().toString(),
+      timestamp: new Date().toISOString(),
+      action,
+      details,
+    };
+    setLogs(prev => [newLog, ...prev.slice(0, 99)]);
+  };
+
+  const clearLogs = () => {
+    const newLog: AdminLog = {
+        id: new Date().getTime().toString(),
+        timestamp: new Date().toISOString(),
+        action: 'Logs',
+        details: 'Log history cleared.',
+      };
+      setLogs([newLog]);
+  };
+
   const resetColorSettings = useCallback(() => {
     setSettings(prev => ({...prev, colors: defaultSettings.colors}));
   }, []);
@@ -98,6 +135,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   const login = (pin: string) => {
     if (pin === ADMIN_PIN) {
       setIsAuthenticated(true);
+      addLog('Authentication', 'Admin logged in.');
       router.push('/admin');
       return true;
     }
@@ -105,6 +143,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    addLog('Authentication', 'Admin logged out.');
     setIsAuthenticated(false);
     router.push('/');
   };
@@ -120,7 +159,12 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     login,
     logout,
     applyColorSettings,
-    resetColorSettings
+    resetColorSettings,
+    isBreakTime,
+    setIsBreakTime,
+    logs,
+    addLog,
+    clearLogs
   };
 
   return (

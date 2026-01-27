@@ -22,3 +22,10 @@ export interface AppSettings {
   soundEnabled: boolean;
   bellSound: string;
 }
+
+export interface AdminLog {
+  id: string;
+  timestamp: string;
+  action: string;
+  details: string;
+}

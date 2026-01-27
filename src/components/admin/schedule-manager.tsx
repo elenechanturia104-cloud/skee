@@ -26,7 +26,7 @@ const scheduleSchema = z.object({
 type ScheduleFormValues = z.infer<typeof scheduleSchema>;
 
 export function ScheduleManager() {
-  const { schedule, setSchedule } = useChronoBoard();
+  const { schedule, setSchedule, addLog } = useChronoBoard();
   const { toast } = useToast();
 
   const form = useForm<ScheduleFormValues>({
@@ -45,6 +45,7 @@ export function ScheduleManager() {
     // Sort by start time before saving
     const sortedSchedule = [...data.schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
     setSchedule(sortedSchedule);
+    addLog('Schedule Updated', `Saved ${sortedSchedule.length} schedule items.`);
     toast({
       title: 'Schedule Saved',
       description: 'The bell schedule has been updated successfully.',

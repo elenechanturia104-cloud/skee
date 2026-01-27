@@ -56,7 +56,7 @@ const ColorInput = ({ label, value, onChange }: { label: string; value: string; 
 
 
 export function AppearanceManager() {
-  const { settings, setSettings, resetColorSettings } = useChronoBoard();
+  const { settings, setSettings, resetColorSettings, addLog } = useChronoBoard();
   const { toast } = useToast();
 
   const handleColorChange = (key: keyof AppSettings['colors']) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +93,7 @@ export function AppearanceManager() {
   }
 
   const handleSaveChanges = () => {
+    addLog('Appearance Updated', 'New appearance settings saved.');
     toast({
         title: 'Appearance Saved',
         description: 'Your new appearance settings have been applied.',
@@ -136,6 +137,7 @@ export function AppearanceManager() {
       <CardFooter className="flex justify-between">
         <Button variant="ghost" onClick={() => {
             resetColorSettings();
+            addLog('Appearance Reset', 'Colors reset to default.');
             toast({ title: 'Colors Reset', description: 'The colors have been reset to their defaults.'});
         }}>
             <Undo className="mr-2 h-4 w-4" /> Reset Colors
