@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ka" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" href="https://fonts.ge/css/bpg-nino-mtavruli.css" />
       </head>
