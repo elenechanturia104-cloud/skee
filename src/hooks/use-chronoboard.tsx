@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { AppSettings, BoardItem, ScheduleItem, AdminLog } from '@/lib/types';
 import { initialBoardItems, initialSchedule } from '@/lib/data';
 import { useRouter } from 'next/navigation';
+import { bellSounds } from '@/lib/sounds';
 
 const ADMIN_PIN = '1234';
 
@@ -61,7 +62,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     if (typeof savedSettings.soundEnabled === 'undefined') {
         savedSettings.soundEnabled = true;
     }
-    if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(require('@/lib/sounds').bellSounds).includes(savedSettings.bellSound)) {
+    if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(bellSounds).includes(savedSettings.bellSound)) {
         savedSettings.bellSound = 'classic';
     }
     return savedSettings;
