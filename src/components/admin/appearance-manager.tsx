@@ -9,9 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { AppSettings } from '@/lib/types';
 import { Undo } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { bellSounds, BellSoundName } from '@/lib/sounds';
+import * as Tone from 'tone';
 
 const ColorInput = ({ label, value, onChange }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
     const hslToHex = (hsl: string): string => {
@@ -58,6 +59,31 @@ const ColorInput = ({ label, value, onChange }: { label: string; value: string; 
 export function AppearanceManager() {
   const { settings, setSettings, resetColorSettings, addLog } = useChronoBoard();
   const { toast } = useToast();
+  const [synth, setSynth] = useState<Tone.Synth | null>(null);
+
+  useEffect(() => {
+    setSynth(new Tone.Synth().toDestination());
+  }, []);
+
+  const playSound = (soundName: BellSoundName) => {
+    if (synth) {
+      try {
+        Tone.start();
+        const soundPreset = bellSounds[soundName] || bellSounds.default;
+        const now = Tone.now();
+        soundPreset.notes.forEach((note, i) => {
+          synth.triggerAttackRelease(note, soundPreset.duration, now + i * soundPreset.interval);
+        });
+      } catch (e) {
+        console.error("Could not play sound:", e);
+        toast({
+          variant: 'destructive',
+          title: 'ხმის დაკვრა ვერ მოხერხდა',
+          description: 'დაფიქსირდა შეცდომა ხმის დაკვრისას.',
+        });
+      }
+    }
+  };
 
   const handleColorChange = (key: keyof AppSettings['colors']) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const hex = e.target.value;
@@ -90,6 +116,9 @@ export function AppearanceManager() {
 
   const handleSoundPresetChange = (value: BellSoundName) => {
     setSettings(prev => ({ ...prev, bellSound: value }));
+    if (settings.soundEnabled) {
+      playSound(value);
+    }
   }
 
   const handleSaveChanges = () => {
@@ -127,7 +156,7 @@ export function AppearanceManager() {
                     </SelectTrigger>
                     <SelectContent>
                         {Object.entries(bellSounds).map(([key, { name }]) => (
-                            <SelectItem key={key} value={key}>{name}</SelectItem>
+                            <SelectItem key={key} value={key as BellSoundName}>{name}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
