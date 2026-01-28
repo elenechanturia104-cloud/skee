@@ -164,8 +164,8 @@ export function BellSchedule() {
   return (
     <Card className="flex flex-col h-full w-full rounded-none border-0 md:border-r bg-card/50 shadow-none">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <ChronoBoardLogo className="h-8 w-8 text-primary" />
+        <div className="flex items-center gap-4">
+          <ChronoBoardLogo className="h-10 w-10 text-primary" />
           <CardTitle className="font-headline text-2xl tracking-tight">ქრონო-დაფა</CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleSound}>
@@ -177,7 +177,7 @@ export function BellSchedule() {
           <p className="font-mono text-4xl font-bold text-primary tracking-widest">
             {isClient && currentTime ? formatTime(currentTime) : '00:00:00'}
           </p>
-          <p className="text-sm text-muted-foreground">{isClient && currentTime ? formatDate(currentTime) : '\u00a0'}</p>
+          <p className="text-sm text-muted-foreground">{isClient && currentTime ? formatDate(currentTime) : ' '}</p>
         </div>
 
         {countdown && (
@@ -190,7 +190,7 @@ export function BellSchedule() {
         )}
 
         <ScrollArea className="flex-grow">
-          <div className="pb-4 pt-0 px-4 space-y-2">
+          <div className="p-4 space-y-2">
             {schedule.map((item) => {
               const isActive = item.id === activeLessonId;
               return (
