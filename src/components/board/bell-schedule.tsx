@@ -135,7 +135,7 @@ export function BellSchedule() {
       if (synth && settings.soundEnabled) {
         try {
           Tone.start();
-          const soundPreset = bellSounds[settings.bellSound as BellSoundName] || bellSounds.default;
+          const soundPreset = bellSounds[settings.bellSound as BellSoundName] || bellSounds.classic;
           const toneNow = Tone.now();
           soundPreset.notes.forEach((note, i) => {
             synth.triggerAttackRelease(note, soundPreset.duration, toneNow + i * soundPreset.interval);
@@ -165,7 +165,7 @@ export function BellSchedule() {
     <Card className="flex flex-col h-full w-full rounded-none border-0 md:border-r bg-card/50 shadow-none">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-4">
-          <ChronoBoardLogo className="h-10 w-10 text-primary" />
+          <ChronoBoardLogo className="h-12 w-12 text-primary" />
           <CardTitle className="font-headline text-2xl tracking-tight">ქრონო-დაფა</CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={toggleSound}>

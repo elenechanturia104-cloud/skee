@@ -14,7 +14,7 @@ const defaultSettings: AppSettings = {
     accent: '276 100% 50%',
   },
   soundEnabled: true,
-  bellSound: 'default',
+  bellSound: 'classic',
 };
 
 interface ChronoBoardContextType {
@@ -61,8 +61,8 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     if (typeof savedSettings.soundEnabled === 'undefined') {
         savedSettings.soundEnabled = true;
     }
-    if (typeof savedSettings.bellSound === 'undefined') {
-        savedSettings.bellSound = 'default';
+    if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(require('@/lib/sounds').bellSounds).includes(savedSettings.bellSound)) {
+        savedSettings.bellSound = 'classic';
     }
     return savedSettings;
   });
