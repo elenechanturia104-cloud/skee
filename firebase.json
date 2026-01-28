@@ -1,0 +1,11 @@
+{
+    "hosting": {
+      "source": ".",
+      "frameworksBackend": {
+        "region": "us-central1",
+        "build": {
+          "command": "npm run build"
+        }
+      }
+    }
+  }
