@@ -69,7 +69,7 @@ export function AppearanceManager() {
     if (synth) {
       try {
         Tone.start();
-        const soundPreset = bellSounds[soundName] || bellSounds.default;
+        const soundPreset = bellSounds[soundName] || bellSounds.school;
         const now = Tone.now();
         soundPreset.notes.forEach((note, i) => {
           synth.triggerAttackRelease(note, soundPreset.duration, now + i * soundPreset.interval);

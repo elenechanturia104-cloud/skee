@@ -135,7 +135,7 @@ export function BellSchedule() {
       if (synth && settings.soundEnabled) {
         try {
           Tone.start();
-          const soundPreset = bellSounds[settings.bellSound as BellSoundName] || bellSounds.classic;
+          const soundPreset = bellSounds[settings.bellSound as BellSoundName] || bellSounds.school;
           const toneNow = Tone.now();
           soundPreset.notes.forEach((note, i) => {
             synth.triggerAttackRelease(note, soundPreset.duration, toneNow + i * soundPreset.interval);
