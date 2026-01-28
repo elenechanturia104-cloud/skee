@@ -42,28 +42,24 @@ const ChronoBoardContext = createContext<ChronoBoardContextType | undefined>(und
 export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
-  const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
-  const [boardItems, setBoardItems] = useState<BoardItem[]>(initialBoardItems);
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [logs, setLogs] = useState<AdminLog[]>([]);
+  const [isClientHydrated, setIsClientHydrated] = useState(false);
 
   useEffect(() => {
     const savedSchedule = localStorage.getItem('chrono-schedule');
-    if (savedSchedule) {
-      setSchedule(JSON.parse(savedSchedule));
-    }
+    setSchedule(savedSchedule ? JSON.parse(savedSchedule) : initialSchedule);
 
     const savedBoardItems = localStorage.getItem('chrono-board-items-v2');
-    if (savedBoardItems) {
-      setBoardItems(JSON.parse(savedBoardItems));
-    }
+    setBoardItems(savedBoardItems ? JSON.parse(savedBoardItems) : initialBoardItems);
 
     const savedSettingsRaw = localStorage.getItem('chrono-settings');
     if (savedSettingsRaw) {
       const savedSettings = JSON.parse(savedSettingsRaw);
-      // ensure defaults for new settings
       if (typeof savedSettings.soundEnabled === 'undefined') {
           savedSettings.soundEnabled = true;
       }
@@ -77,15 +73,21 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     if (savedLogs) {
       setLogs(JSON.parse(savedLogs));
     }
+
+    setIsClientHydrated(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('chrono-schedule', JSON.stringify(schedule));
-  }, [schedule]);
+    if (isClientHydrated) {
+      localStorage.setItem('chrono-schedule', JSON.stringify(schedule));
+    }
+  }, [schedule, isClientHydrated]);
 
   useEffect(() => {
-    localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
-  }, [boardItems]);
+    if (isClientHydrated) {
+      localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
+    }
+  }, [boardItems, isClientHydrated]);
 
   const applyColorSettings = useCallback((colors: AppSettings['colors']) => {
     const root = document.documentElement;
@@ -95,13 +97,17 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('chrono-settings', JSON.stringify(settings));
-    applyColorSettings(settings.colors);
-  }, [settings, applyColorSettings]);
+    if (isClientHydrated) {
+      localStorage.setItem('chrono-settings', JSON.stringify(settings));
+      applyColorSettings(settings.colors);
+    }
+  }, [settings, applyColorSettings, isClientHydrated]);
 
   useEffect(() => {
-    localStorage.setItem('chrono-logs', JSON.stringify(logs));
-  }, [logs]);
+    if (isClientHydrated) {
+      localStorage.setItem('chrono-logs', JSON.stringify(logs));
+    }
+  }, [logs, isClientHydrated]);
 
   const addLog = (action: string, details: string) => {
     const newLog: AdminLog = {
