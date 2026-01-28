@@ -42,50 +42,49 @@ const ChronoBoardContext = createContext<ChronoBoardContextType | undefined>(und
 export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
-  const [schedule, setSchedule] = useState<ScheduleItem[]>(() => {
-    if (typeof window === 'undefined') return initialSchedule;
-    const saved = localStorage.getItem('chrono-schedule');
-    return saved ? JSON.parse(saved) : initialSchedule;
-  });
-
-  const [boardItems, setBoardItems] = useState<BoardItem[]>(() => {
-    if (typeof window === 'undefined') return initialBoardItems;
-    const saved = localStorage.getItem('chrono-board-items-v2');
-    return saved ? JSON.parse(saved) : initialBoardItems;
-  });
-
-  const [settings, setSettings] = useState<AppSettings>(() => {
-    if (typeof window === 'undefined') return defaultSettings;
-    const saved = localStorage.getItem('chrono-settings');
-    const savedSettings = saved ? JSON.parse(saved) : defaultSettings;
-    // ensure defaults for new settings
-    if (typeof savedSettings.soundEnabled === 'undefined') {
-        savedSettings.soundEnabled = true;
-    }
-    if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(bellSounds).includes(savedSettings.bellSound)) {
-        savedSettings.bellSound = 'school';
-    }
-    return savedSettings;
-  });
-
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
+  const [boardItems, setBoardItems] = useState<BoardItem[]>(initialBoardItems);
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
-  const [logs, setLogs] = useState<AdminLog[]>(() => {
-    if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem('chrono-logs');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [logs, setLogs] = useState<AdminLog[]>([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('chrono-schedule', JSON.stringify(schedule));
+    const savedSchedule = localStorage.getItem('chrono-schedule');
+    if (savedSchedule) {
+      setSchedule(JSON.parse(savedSchedule));
     }
+
+    const savedBoardItems = localStorage.getItem('chrono-board-items-v2');
+    if (savedBoardItems) {
+      setBoardItems(JSON.parse(savedBoardItems));
+    }
+
+    const savedSettingsRaw = localStorage.getItem('chrono-settings');
+    if (savedSettingsRaw) {
+      const savedSettings = JSON.parse(savedSettingsRaw);
+      // ensure defaults for new settings
+      if (typeof savedSettings.soundEnabled === 'undefined') {
+          savedSettings.soundEnabled = true;
+      }
+      if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(bellSounds).includes(savedSettings.bellSound)) {
+          savedSettings.bellSound = 'school';
+      }
+      setSettings(savedSettings);
+    }
+
+    const savedLogs = localStorage.getItem('chrono-logs');
+    if (savedLogs) {
+      setLogs(JSON.parse(savedLogs));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('chrono-schedule', JSON.stringify(schedule));
   }, [schedule]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
-    }
+    localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
   }, [boardItems]);
 
   const applyColorSettings = useCallback((colors: AppSettings['colors']) => {
@@ -96,16 +95,12 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('chrono-settings', JSON.stringify(settings));
-        applyColorSettings(settings.colors);
-    }
+    localStorage.setItem('chrono-settings', JSON.stringify(settings));
+    applyColorSettings(settings.colors);
   }, [settings, applyColorSettings]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('chrono-logs', JSON.stringify(logs));
-    }
+    localStorage.setItem('chrono-logs', JSON.stringify(logs));
   }, [logs]);
 
   const addLog = (action: string, details: string) => {
