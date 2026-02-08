@@ -1,0 +1,16 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow read access to all users, but only write access to authenticated super admins.
+    // In a real application, you would have more granular rules.
+    match /schools/{schoolId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.isSuperAdmin == true;
+    }
+
+    // You would also have rules for other collections, such as users, here.
+  }
+}

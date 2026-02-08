@@ -10,6 +10,34 @@
 - Customizable Board Appearance: Admin feature to customize the board's colors.
 - Bell Sound Customization: Admin feature to add customize bell sound.
 
+## Super Admin Panel:
+
+- A separate, higher-level admin panel with its own codebase.
+- This panel will be used to manage a list of schools.
+- The super admin can add, edit, and delete schools.
+
+## School Management:
+
+- Each school will have its own individual settings.
+- The super admin can manage the following for each school:
+    - Design (colors)
+    - Name
+    - Logo
+    - Class schedule
+    - Bell settings
+    - Information board content
+- All school information will be fully editable after creation.
+
+## Board Refresh:
+
+- Both admin panels will have the ability to refresh the school “boards”.
+- The admin can choose the refresh interval (e.g., 5, 10, or 20 minutes).
+
+## Data Synchronization:
+
+- Time calculations will not rely on the device’s system time.
+- Time will be synchronized via the internet to ensure accuracy.
+
 ## Style Guidelines:
 
 - Primary color: Deep indigo (#4B0082) to evoke trust and concentration.
