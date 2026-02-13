@@ -1,9 +1,11 @@
+@import url('https://fonts.ge/css/bpg-nino-mtavruli.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
+i  :root {
     --background: 240 67% 94.1%;
     --foreground: 275 100% 15%;
     --card: 240 67% 96%;
@@ -30,7 +32,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
-  .dark, .break-mode {
+  .dark {
     --background: 275 30% 10%;
     --foreground: 240 67% 94.1%;
     --card: 275 30% 12%;
@@ -56,13 +58,15 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  .font-body {
+    font-family: 'BPG Nino Mtavruli', sans-serif;
   }
 }

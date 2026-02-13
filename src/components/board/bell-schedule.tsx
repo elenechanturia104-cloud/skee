@@ -1,27 +1,41 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useChronoBoard } from '@/hooks/use-chronoboard';
 import { Bell, Volume2, VolumeX } from 'lucide-react';
 import * as Tone from 'tone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChronoBoardLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { bellSounds, BellSoundName } from '@/lib/sounds';
-import { ScheduleItem } from '@/lib/types';
 import { format } from 'date-fns';
 import { ka } from 'date-fns/locale';
+import Image from 'next/image';
 
-export function BellSchedule() {
-  const { schedule, settings, setSettings, setIsBreakTime } = useChronoBoard();
+// This interface must match the one in `schema.ts`
+interface ScheduleItem {
+    id?: string;
+    name: string;
+    startTime: string;
+    endTime: string;
+}
+
+interface BellScheduleProps {
+  schedule: ScheduleItem[];
+  logo?: string;
+  schoolName: string;
+  bellSoundUrl?: string;
+  bellVolume?: number; 
+}
+
+export function BellSchedule({ schedule, logo, schoolName, bellSoundUrl, bellVolume }: BellScheduleProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [isRinging, setIsRinging] = useState(false);
   const [synth, setSynth] = useState<Tone.Synth | null>(null);
   const [countdown, setCountdown] = useState<{ label: string; time: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
-
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  
   useEffect(() => {
     setIsClient(true);
     // Initialize synth on client
@@ -34,17 +48,15 @@ export function BellSchedule() {
   }, []);
 
   useEffect(() => {
-    if (!currentTime || !isClient) {
+    if (!currentTime || !isClient || !schedule) {
         return;
     }
     
-    // Sort schedule for logical operations, but don't change the original order for display
     const sortedSchedule = [...schedule].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     if (sortedSchedule.length === 0) {
         setCountdown(null);
         setActiveLessonId(null);
-        setIsBreakTime(false);
         return;
     }
     
@@ -70,14 +82,11 @@ export function BellSchedule() {
         }
       }
       if (!nextLesson && sortedSchedule.length > 0) {
-        // If it's past the last lesson, the next one is the first one tomorrow
         nextLesson = sortedSchedule[0];
       }
     }
 
-    const isBreak = activeLesson ? activeLesson.name.toLowerCase().includes('break') || activeLesson.name.toLowerCase().includes('დასვენება') : false;
-    setIsBreakTime(isBreak);
-    setActiveLessonId(activeLesson ? activeLesson.id : null);
+    setActiveLessonId(activeLesson ? activeLesson.id || null : null);
 
     // Countdown logic
     let countdownLabel = '';
@@ -87,6 +96,7 @@ export function BellSchedule() {
       const [endHours, endMinutes] = activeLesson.endTime.split(':').map(Number);
       targetTime = new Date(now);
       targetTime.setHours(endHours, endMinutes, 0, 0);
+      const isBreak = activeLesson.name.toLowerCase().includes('break') || activeLesson.name.toLowerCase().includes('დასვენება');
       countdownLabel = isBreak ? 'შესვენების დასრულებამდე' : 'გაკვეთილის დასრულებამდე';
     } else if (nextLesson) {
       const [startHours, startMinutes] = nextLesson.startTime.split(':').map(Number);
@@ -106,11 +116,11 @@ export function BellSchedule() {
         if (diff >= 0) {
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const secondsLeft = Math.floor((diff % (1000 * 60)) / 1000);
             
             setCountdown({
                 label: countdownLabel,
-                time: `${hours > 0 ? hours.toString().padStart(2, '0') + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                time: `${hours > 0 ? hours.toString().padStart(2, '0') + ':' : ''}${minutes.toString().padStart(2, '0')}:${secondsLeft.toString().padStart(2, '0')}`
             });
         } else {
              setCountdown(null);
@@ -132,22 +142,19 @@ export function BellSchedule() {
 
     if (shouldRing) {
       setIsRinging(true);
-      if (synth && settings.soundEnabled) {
+      if (synth && soundEnabled) {
         try {
           Tone.start();
-          const soundPreset = bellSounds[settings.bellSound as BellSoundName] || bellSounds.school;
-          const toneNow = Tone.now();
-          soundPreset.notes.forEach((note, i) => {
-            synth.triggerAttackRelease(note, soundPreset.duration, toneNow + i * soundPreset.interval);
-          });
+          // This is a simple generic bell sound. You can customize this.
+          synth.triggerAttackRelease("C5", "8n", Tone.now());
         } catch (e) {
           console.error("Could not play sound:", e);
         }
       }
-      setTimeout(() => setIsRinging(false), 5000);
+      setTimeout(() => setIsRinging(false), 5000); // Ring for 5 seconds
     }
 
-  }, [currentTime, schedule, synth, settings.soundEnabled, settings.bellSound, setIsBreakTime, isClient]);
+  }, [currentTime, schedule, synth, isClient, soundEnabled]);
 
   const formatTime = (date: Date) => {
     return format(date, 'HH:mm:ss');
@@ -157,19 +164,15 @@ export function BellSchedule() {
     return format(date, "EEEE, dd MMMM, yyyy", { locale: ka });
   }
 
-  const toggleSound = () => {
-    setSettings(prev => ({...prev, soundEnabled: !prev.soundEnabled}));
-  }
-
   return (
     <Card className="flex flex-col h-full w-full rounded-none border-0 md:border-r bg-card/50 shadow-none">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-4">
-          <ChronoBoardLogo className="h-12 w-12 text-primary" />
-          <CardTitle className="font-headline text-2xl tracking-tight">ქრონო-დაფა</CardTitle>
+          {logo && <Image src={logo} alt={schoolName} width={48} height={48} className="rounded-md"/>}
+          <CardTitle className="font-headline text-xl tracking-tight">{schoolName}</CardTitle>
         </div>
-        <Button variant="ghost" size="icon" onClick={toggleSound}>
-          {settings.soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+        <Button variant="ghost" size="icon" onClick={() => setSoundEnabled(!soundEnabled)}>
+          {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col flex-grow p-0 min-h-0">

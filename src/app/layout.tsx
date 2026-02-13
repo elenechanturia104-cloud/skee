@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ChronoBoardProviders } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
@@ -15,14 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka" suppressHydrationWarning>
-      <head>
-        <link rel="stylesheet" href="https://fonts.ge/css/bpg-nino-mtavruli.css" />
-      </head>
       <body className="font-body antialiased">
-        <ChronoBoardProviders>
-          {children}
-          <Toaster />
-        </ChronoBoardProviders>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { SchoolSchema } from '@/lib/schema';
 import { z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -13,16 +13,34 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import placeholderImagesData from '@/lib/placeholder-images.json';
 
-type School = z.infer<typeof SchoolSchema> & { id: string };
+type SchoolFormData = z.infer<typeof SchoolSchema>;
+type School = SchoolFormData & { id: string };
+
+const { placeholderImages } = placeholderImagesData;
+
+const defaultSchoolValues: SchoolFormData = {
+  name: '',
+  logo: '',
+  adminPassword: '',
+  design: { primaryColor: '#4B0082', backgroundColor: '#E6E6FA', accentColor: '#8F00FF' },
+  schedule: [],
+  bellSettings: { sound: 'school', volume: 50 },
+  infoBoard: { content: '' },
+  refreshInterval: '10',
+};
 
 export default function SuperAdminDashboard() {
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  const [isNew, setIsNew] = useState(false);
 
-  const { register, handleSubmit, reset, control, setValue } = useForm<z.infer<typeof SchoolSchema>>({
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<SchoolFormData>({
     resolver: zodResolver(SchoolSchema),
+    defaultValues: defaultSchoolValues,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -30,126 +48,168 @@ export default function SuperAdminDashboard() {
     name: "schedule",
   });
 
+  const logoUrl = watch('logo');
+
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'schools'), (snapshot) => {
-      const schoolsData: School[] = [];
-      snapshot.forEach((doc) => {
-        schoolsData.push({ id: doc.id, ...doc.data() } as School);
-      });
+      const schoolsData: School[] = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as SchoolFormData) }));
       setSchools(schoolsData);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
-  const updateSchool = async (data: z.infer<typeof SchoolSchema>) => {
-    if (selectedSchool) {
-      const schoolRef = doc(db, 'schools', selectedSchool.id);
+  useEffect(() => {
+    if (isNew) {
+      reset(defaultSchoolValues);
+    } else if (selectedSchoolId) {
+      const school = schools.find(s => s.id === selectedSchoolId);
+      if (school) {
+        const schoolWithDefaults = {
+          ...defaultSchoolValues,
+          ...school,
+          design: { ...defaultSchoolValues.design, ...school.design },
+          bellSettings: { ...defaultSchoolValues.bellSettings, ...school.bellSettings },
+          infoBoard: { ...defaultSchoolValues.infoBoard, ...school.infoBoard },
+        };
+        reset(schoolWithDefaults);
+      }
+    } else {
+      reset(defaultSchoolValues);
+    }
+  }, [selectedSchoolId, schools, reset, isNew]);
+
+  const handleSave = async (data: SchoolFormData) => {
+    if (isNew) {
+      await addDoc(collection(db, 'schools'), data);
+    } else if (selectedSchoolId) {
+      const schoolRef = doc(db, 'schools', selectedSchoolId);
       await updateDoc(schoolRef, data);
-      setSelectedSchool(null); // Deselect after saving
-      reset();
     }
+    handleCancel();
   };
 
-  const handleSchoolSelect = (schoolId: string) => {
-    const school = schools.find(s => s.id === schoolId);
-    if (school) {
-        setSelectedSchool(school);
-        setValue('name', school.name);
-        setValue('logo', school.logo);
-        setValue('design.primaryColor', school.design.primaryColor);
-        setValue('design.backgroundColor', school.design.backgroundColor);
-        setValue('design.accentColor', school.design.accentColor);
-        setValue('schedule', school.schedule);
-        setValue('bellSettings.sound', school.bellSettings.sound);
-        setValue('bellSettings.volume', school.bellSettings.volume);
-        setValue('infoBoard.content', school.infoBoard.content);
-        setValue('refreshInterval', school.refreshInterval);
-    }
+  const handleAddNew = () => {
+    setSelectedSchoolId(null);
+    setIsNew(true);
   };
 
+  const handleCancel = () => {
+    setSelectedSchoolId(null);
+    setIsNew(false);
+    reset(defaultSchoolValues);
+  };
+  
   if (loading) {
-    return <div>Loading schools...</div>;
+    return <div>Loading...</div>;
   }
 
+  const isEditing = selectedSchoolId || isNew;
+  const currentSchoolName = isNew ? "New School" : schools.find(s => s.id === selectedSchoolId)?.name;
+
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Super Admin Dashboard</h1>
 
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Select a School to Manage</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Select onValueChange={handleSchoolSelect}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a school" />
-              </SelectTrigger>
-              <SelectContent>
-                {schools.map(school => (
-                  <SelectItem key={school.id} value={school.id}>{school.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-        </CardContent>
-      </Card>
-
-      {selectedSchool && (
-        <Card>
+      {!isEditing ? (
+         <Card>
             <CardHeader>
-                <CardTitle>Editing: {selectedSchool.name}</CardTitle>
+              <CardTitle>Select or Create a School</CardTitle>
             </CardHeader>
             <CardContent>
-            <form onSubmit={handleSubmit(updateSchool)} className="space-y-4">
-                <Input {...register('name')} placeholder="School Name" />
-                <Input {...register('logo')} placeholder="Logo URL" />
-
-                <div>
-                <Label>Design</Label>
-                <div className="grid grid-cols-3 gap-2">
-                    <Input {...register('design.primaryColor')} placeholder="Primary Color" />
-                    <Input {...register('design.backgroundColor')} placeholder="Background Color" />
-                    <Input {...register('design.accentColor')} placeholder="Accent Color" />
-                </div>
-                </div>
-
-                <div>
-                <Label>Schedule</Label>
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-2 mb-2">
-                    <Input {...register(`schedule.${index}.time`)} placeholder="Time" />
-                    <Input {...register(`schedule.${index}.event`)} placeholder="Event" />
-                    <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>Remove</Button>
-                    </div>
-                ))}
-                <Button type="button" onClick={() => append({ time: '', event: '' })}>Add Schedule Item</Button>
-                </div>
-
-                <div>
-                <Label>Bell Settings</Label>
-                <div className="grid grid-cols-2 gap-2">
-                    <Input {...register('bellSettings.sound')} placeholder="Bell Sound URL" />
-                    <Input type="number" {...register('bellSettings.volume', { valueAsNumber: true })} placeholder="Volume (0-100)" />
-                </div>
-                </div>
-
-                <Input {...register('infoBoard.content')} placeholder="Information Board Content" />
-
-                <Select onValueChange={(value) => setValue('refreshInterval', value as '5' | '10' | '20')} defaultValue={selectedSchool.refreshInterval}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Refresh Interval" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="5">5 minutes</SelectItem>
-                        <SelectItem value="10">10 minutes</SelectItem>
-                        <SelectItem value="20">20 minutes</SelectItem>
-                    </SelectContent>
+                <Select onValueChange={setSelectedSchoolId} value={selectedSchoolId || ''}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a school to edit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schools.map(school => (
+                      <SelectItem key={school.id} value={school.id}>{school.name}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
+                <Button onClick={handleAddNew} className="mt-4">Add New School</Button>
+            </CardContent>
+          </Card>
+      ) : (
+        <Card>
+            <CardHeader>
+                <CardTitle>{isNew ? "Add New School" : `Editing: ${currentSchoolName}`}</CardTitle>
+            </CardHeader>
+            <CardContent>
+            <form onSubmit={handleSubmit(handleSave)} className="space-y-6">
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">Basic Information</h3>
+                  <div className="space-y-2">
+                    <Label>School Name</Label>
+                    <Input {...register('name')} />
+                    {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+                    
+                    <div className="flex items-center gap-4">
+                        <div className="w-24 h-24 bg-cover bg-center border rounded-md" style={{ backgroundImage: `url(${logoUrl})` }}></div>
+                        <div className="flex-1">
+                            <Label>Logo URL</Label>
+                            <Input {...register('logo')} />
+                             <Select onValueChange={(value) => setValue('logo', value)}>
+                                <SelectTrigger className="mt-2">
+                                    <SelectValue placeholder="Or choose a placeholder" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {placeholderImages.map((image) => (
+                                        <SelectItem key={image.id} value={image.imageUrl}>
+                                            {image.imageHint}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    
+                    <Label>Admin Password</Label>
+                    <Input type="password" {...register('adminPassword')} />
+                  </div>
+                </section>
+                
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">Design</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label>Primary Color</Label>
+                        <Input type="color" {...register('design.primaryColor')} />
+                      </div>
+                      <div>
+                        <Label>Background Color</Label>
+                        <Input type="color" {...register('design.backgroundColor')} />
+                      </div>
+                      <div>
+                        <Label>Accent Color</Label>
+                        <Input type="color" {...register('design.accentColor')} />
+                      </div>
+                  </div>
+                </section>
 
-                <div className="flex gap-2">
-                <Button type="submit">Save Changes</Button>
-                <Button variant="outline" onClick={() => { setSelectedSchool(null); reset(); }}>Cancel</Button>
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">Schedule</h3>
+                  <div className="space-y-2">
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-2 p-2 border rounded-md">
+                            <Input {...register(`schedule.${index}.name`)} placeholder="Event Name" className="flex-1" />
+                            <Input {...register(`schedule.${index}.startTime`)} placeholder="Start (HH:MM)" />
+                            <Input {...register(`schedule.${index}.endTime`)} placeholder="End (HH:MM)" />
+                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>X</Button>
+                        </div>
+                    ))}
+                  </div>
+                  <Button type="button" onClick={() => append({ id: `${Date.now()}`, name: '', startTime: '', endTime: '' })} className="mt-2">Add Event</Button>
+                </section>
+                
+                <section>
+                   <h3 className="text-lg font-semibold mb-2">Information Board</h3>
+                   <Textarea {...register('infoBoard.content')} placeholder="Enter content for the information board..." />
+                </section>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+                  <Button type="submit">Save Changes</Button>
                 </div>
             </form>
             </CardContent>

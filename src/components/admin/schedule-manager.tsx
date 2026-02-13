@@ -1,6 +1,5 @@
 'use client';
 
-import { useChronoBoard } from '@/hooks/use-chronoboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,6 +10,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useEffect } from 'react';
+
+// Inline type to fix import errors
+interface ScheduleItem {
+    id: string;
+    name: string;
+    startTime: string;
+    endTime: string;
+}
 
 const scheduleSchema = z.object({
   schedule: z.array(
@@ -25,35 +35,52 @@ const scheduleSchema = z.object({
 
 type ScheduleFormValues = z.infer<typeof scheduleSchema>;
 
-export function ScheduleManager() {
-  const { schedule, setSchedule, addLog } = useChronoBoard();
+interface ScheduleManagerProps {
+  schedule: ScheduleItem[];
+  schoolId: string;
+}
+
+export function ScheduleManager({ schedule, schoolId }: ScheduleManagerProps) {
   const { toast } = useToast();
 
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleSchema),
-    values: {
-      schedule: schedule,
+    defaultValues: {
+      schedule: [],
     },
   });
+
+  useEffect(() => {
+    form.reset({ schedule });
+  }, [schedule, form]);
   
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: 'schedule',
   });
 
-  const onSubmit = (data: ScheduleFormValues) => {
-    setSchedule(data.schedule);
-    addLog('განრიგი განახლდა', `შენახულია ${data.schedule.length} ერთეული.`);
-    toast({
-      title: 'განრიგი შენახულია',
-      description: 'ზარის განრიგი წარმატებით განახლდა.',
-    });
+  const onSubmit = async (data: ScheduleFormValues) => {
+    const schoolRef = doc(db, 'schools', schoolId);
+    try {
+      await updateDoc(schoolRef, { schedule: data.schedule });
+      toast({
+        title: 'განრიგი შენახულია',
+        description: 'ზარის განრიგი წარმატებით განახლდა.',
+      });
+    } catch (error) {
+        console.error("Error updating schedule:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error saving changes',
+            description: 'There was an error while saving the schedule.',
+          });
+    }
   };
 
   const addNewItem = () => {
     append({
         id: new Date().getTime().toString(),
-        name: 'ახალი გაკვეთილი',
+        name: 'ახალი პერიოდი',
         startTime: '00:00',
         endTime: '00:00',
     });
@@ -72,7 +99,7 @@ export function ScheduleManager() {
                 <Table>
                 <TableHeader>
                     <TableRow>
-                    <TableHead>გაკვეთილის სახელი</TableHead>
+                    <TableHead>დასახელება</TableHead>
                     <TableHead>დაწყების დრო</TableHead>
                     <TableHead>დასრულების დრო</TableHead>
                     <TableHead className="text-right w-[150px]">მოქმედებები</TableHead>

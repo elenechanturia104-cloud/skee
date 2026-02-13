@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { AppSettings, BoardItem, ScheduleItem, AdminLog } from '@/lib/types';
-import { initialBoardItems, initialSchedule } from '@/lib/data';
+import { AppSettings, ScheduleItem, AdminLog, School } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { bellSounds } from '@/lib/sounds';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const ADMIN_PIN = '1234';
 
@@ -21,8 +21,6 @@ const defaultSettings: AppSettings = {
 interface ChronoBoardContextType {
   schedule: ScheduleItem[];
   setSchedule: React.Dispatch<React.SetStateAction<ScheduleItem[]>>;
-  boardItems: BoardItem[];
-  setBoardItems: React.Dispatch<React.SetStateAction<BoardItem[]>>;
   settings: AppSettings;
   setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
   isAuthenticated: boolean;
@@ -35,59 +33,67 @@ interface ChronoBoardContextType {
   logs: AdminLog[];
   addLog: (action: string, details: string) => void;
   clearLogs: () => void;
+  school: School | null;
 }
 
 const ChronoBoardContext = createContext<ChronoBoardContextType | undefined>(undefined);
 
-export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
+export const ChronoBoardProvider = ({ children, schoolId }: { children: ReactNode, schoolId: string }) => {
   const router = useRouter();
 
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-  const [boardItems, setBoardItems] = useState<BoardItem[]>([]);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [logs, setLogs] = useState<AdminLog[]>([]);
   const [isClientHydrated, setIsClientHydrated] = useState(false);
+  const [school, setSchool] = useState<School | null>(null);
 
   useEffect(() => {
-    const savedSchedule = localStorage.getItem('chrono-schedule');
-    setSchedule(savedSchedule ? JSON.parse(savedSchedule) : initialSchedule);
+    const getSchool = async () => {
+      const schoolRef = doc(db, "schools", schoolId);
+      const schoolSnap = await getDoc(schoolRef);
 
-    const savedBoardItems = localStorage.getItem('chrono-board-items-v2');
-    setBoardItems(savedBoardItems ? JSON.parse(savedBoardItems) : initialBoardItems);
+      if (schoolSnap.exists()) {
+        setSchool({ id: schoolSnap.id, ...schoolSnap.data() } as School);
+      }
+    };
 
-    const savedSettingsRaw = localStorage.getItem('chrono-settings');
-    if (savedSettingsRaw) {
-      const savedSettings = JSON.parse(savedSettingsRaw);
-      if (typeof savedSettings.soundEnabled === 'undefined') {
-          savedSettings.soundEnabled = true;
-      }
-      if (typeof savedSettings.bellSound === 'undefined' || !Object.keys(bellSounds).includes(savedSettings.bellSound)) {
-          savedSettings.bellSound = 'school';
-      }
-      setSettings(savedSettings);
+    if (schoolId) {
+      getSchool();
     }
+  }, [schoolId]);
 
-    const savedLogs = localStorage.getItem('chrono-logs');
+
+  useEffect(() => {
+    if (school) {
+      setSchedule(school.schedule);
+      setSettings({
+        colors: {
+          primary: school.design.primaryColor,
+          background: school.design.backgroundColor,
+          accent: school.design.accentColor,
+        },
+        soundEnabled: school.bellSettings.volume > 0,
+        bellSound: school.bellSettings.sound,
+      });
+    }
+  }, [school]);
+
+  useEffect(() => {
+    const savedLogs = localStorage.getItem(`chrono-logs-${schoolId}`);
     if (savedLogs) {
       setLogs(JSON.parse(savedLogs));
     }
 
     setIsClientHydrated(true);
-  }, []);
+  }, [schoolId]);
 
   useEffect(() => {
     if (isClientHydrated) {
-      localStorage.setItem('chrono-schedule', JSON.stringify(schedule));
+      localStorage.setItem(`chrono-logs-${schoolId}`, JSON.stringify(logs));
     }
-  }, [schedule, isClientHydrated]);
-
-  useEffect(() => {
-    if (isClientHydrated) {
-      localStorage.setItem('chrono-board-items-v2', JSON.stringify(boardItems));
-    }
-  }, [boardItems, isClientHydrated]);
+  }, [logs, isClientHydrated, schoolId]);
 
   const applyColorSettings = useCallback((colors: AppSettings['colors']) => {
     const root = document.documentElement;
@@ -98,16 +104,9 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isClientHydrated) {
-      localStorage.setItem('chrono-settings', JSON.stringify(settings));
       applyColorSettings(settings.colors);
     }
-  }, [settings, applyColorSettings, isClientHydrated]);
-
-  useEffect(() => {
-    if (isClientHydrated) {
-      localStorage.setItem('chrono-logs', JSON.stringify(logs));
-    }
-  }, [logs, isClientHydrated]);
+  }, [settings.colors, applyColorSettings, isClientHydrated]);
 
   const addLog = (action: string, details: string) => {
     const newLog: AdminLog = {
@@ -138,7 +137,7 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     if (pin === ADMIN_PIN) {
       setIsAuthenticated(true);
       addLog('ავტორიზაცია', 'ადმინისტრატორი შემოვიდა.');
-      router.push('/admin');
+      router.push(`/admin?schoolId=${schoolId}`);
       return true;
     }
     return false;
@@ -147,14 +146,12 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     addLog('ავტორიზაცია', 'ადმინისტრატორი გავიდა.');
     setIsAuthenticated(false);
-    router.push('/');
+    router.push(`/school/${schoolId}`);
   };
 
   const value = {
     schedule,
     setSchedule,
-    boardItems,
-    setBoardItems,
     settings,
     setSettings,
     isAuthenticated,
@@ -166,7 +163,8 @@ export const ChronoBoardProvider = ({ children }: { children: ReactNode }) => {
     setIsBreakTime,
     logs,
     addLog,
-    clearLogs
+    clearLogs,
+    school
   };
 
   return (

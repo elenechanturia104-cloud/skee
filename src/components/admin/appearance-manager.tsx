@@ -1,18 +1,30 @@
 'use client';
 
-import { useChronoBoard } from '@/hooks/use-chronoboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { AppSettings } from '@/lib/types';
 import { Undo } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { bellSounds, BellSoundName } from '@/lib/sounds';
 import * as Tone from 'tone';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+// Inline types to fix import errors
+interface Design {
+  primaryColor: string;
+  backgroundColor: string;
+  accentColor: string;
+}
+
+interface BellSettings {
+  volume: number;
+  sound: BellSoundName;
+}
 
 const ColorInput = ({ label, value, onChange }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
     const hslToHex = (hsl: string): string => {
@@ -55,10 +67,16 @@ const ColorInput = ({ label, value, onChange }: { label: string; value: string; 
     );
 };
 
+interface AppearanceManagerProps {
+  design: Design;
+  bellSettings: BellSettings;
+  schoolId: string;
+}
 
-export function AppearanceManager() {
-  const { settings, setSettings, resetColorSettings, addLog } = useChronoBoard();
+export function AppearanceManager({ design, bellSettings, schoolId }: AppearanceManagerProps) {
   const { toast } = useToast();
+  const [currentDesign, setCurrentDesign] = useState(design);
+  const [currentBellSettings, setCurrentBellSettings] = useState(bellSettings);
   const [synth, setSynth] = useState<Tone.Synth | null>(null);
 
   useEffect(() => {
@@ -85,7 +103,7 @@ export function AppearanceManager() {
     }
   };
 
-  const handleColorChange = (key: keyof AppSettings['colors']) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleColorChange = (key: keyof Design) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const hex = e.target.value;
     const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
     let h = 0, s = 0, l = 0;
@@ -104,29 +122,47 @@ export function AppearanceManager() {
     l = +(l * 100).toFixed(1);
     const newHsl = `${h} ${s}% ${l}%`;
 
-    setSettings(prev => ({
+    setCurrentDesign((prev: Design) => ({
       ...prev,
-      colors: { ...prev.colors, [key]: newHsl },
+      [key]: newHsl,
     }));
   };
   
   const handleSoundToggle = (checked: boolean) => {
-    setSettings(prev => ({ ...prev, soundEnabled: checked }));
+    setCurrentBellSettings((prev: BellSettings) => ({ ...prev, volume: checked ? 50 : 0 }));
   }
 
   const handleSoundPresetChange = (value: BellSoundName) => {
-    setSettings(prev => ({ ...prev, bellSound: value }));
-    if (settings.soundEnabled) {
+    setCurrentBellSettings((prev: BellSettings) => ({ ...prev, sound: value }));
+    if (currentBellSettings.volume > 0) {
       playSound(value);
     }
   }
 
-  const handleSaveChanges = () => {
-    addLog('გარეგნობა განახლდა', 'გარეგნობის ახალი პარამეტრები შეინახა.');
-    toast({
-        title: 'გარეგნობა შენახულია',
-        description: 'თქვენი გარეგნობის ახალი პარამეტრები გამოყენებულია.',
-    });
+  const handleSaveChanges = async () => {
+    const schoolRef = doc(db, 'schools', schoolId);
+    try {
+      await updateDoc(schoolRef, {
+        design: currentDesign,
+        bellSettings: currentBellSettings,
+      });
+      toast({
+          title: 'გარეგნობა შენახულია',
+          description: 'თქვენი გარეგნობის ახალი პარამეტრები გამოყენებულია.',
+      });
+    } catch (error) {
+      console.error("Error updating appearance:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error saving changes',
+        description: 'There was an error while saving the appearance settings.',
+      });
+    }
+  }
+
+  const resetColorSettings = () => {
+    setCurrentDesign(design);
+    toast({ title: 'ფერები აღდგენილია', description: 'ფერები დაუბრუნდა თავდაპირველ მნიშვნელობებს.'});
   }
 
   return (
@@ -138,19 +174,19 @@ export function AppearanceManager() {
       <CardContent className="space-y-6">
         <div className="space-y-4">
             <h4 className="font-medium">ფერები</h4>
-            <ColorInput label="მთავარი" value={settings.colors.primary} onChange={handleColorChange('primary')} />
-            <ColorInput label="ფონი" value={settings.colors.background} onChange={handleColorChange('background')} />
-            <ColorInput label="აქცენტი" value={settings.colors.accent} onChange={handleColorChange('accent')} />
+            <ColorInput label="მთავარი" value={currentDesign.primaryColor} onChange={handleColorChange('primaryColor')} />
+            <ColorInput label="ფონი" value={currentDesign.backgroundColor} onChange={handleColorChange('backgroundColor')} />
+            <ColorInput label="აქცენტი" value={currentDesign.accentColor} onChange={handleColorChange('accentColor')} />
         </div>
         <div className="space-y-4">
             <h4 className="font-medium">ხმა</h4>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Label htmlFor="sound-enabled">ზარის ხმის ჩართვა</Label>
-                <Switch id="sound-enabled" checked={settings.soundEnabled} onCheckedChange={handleSoundToggle} />
+                <Switch id="sound-enabled" checked={currentBellSettings.volume > 0} onCheckedChange={handleSoundToggle} />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Label htmlFor="sound-preset">ზარის ხმის პარამეტრი</Label>
-                <Select value={settings.bellSound} onValueChange={handleSoundPresetChange}>
+                <Select value={currentBellSettings.sound} onValueChange={handleSoundPresetChange}>
                     <SelectTrigger id="sound-preset" className="w-full sm:w-[180px]">
                         <SelectValue placeholder="აირჩიეთ ხმა" />
                     </SelectTrigger>
@@ -164,11 +200,7 @@ export function AppearanceManager() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="ghost" onClick={() => {
-            resetColorSettings();
-            addLog('გარეგნობა აღდგა', 'ფერები დაბრუნდა საწყის მდგომარეობაში.');
-            toast({ title: 'ფერები აღდგენილია', description: 'ფერები დაუბრუნდა თავდაპირველ მნიშვნელობებს.'});
-        }}>
+        <Button variant="ghost" onClick={resetColorSettings}>
             <Undo className="mr-2 h-4 w-4" /> ფერების აღდგენა
         </Button>
         <Button onClick={handleSaveChanges}>ცვლილებების შენახვა</Button>

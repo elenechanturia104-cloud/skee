@@ -1,14 +1,45 @@
-
 import { z } from 'zod';
 
-// Defines the structure for the super admin user
-export const SuperAdminSchema = z.object({
-  email: z.string().email(),
-  name: z.string(),
-  // Add other super admin specific fields here
+// Define the allowed bell sounds
+export const BellSoundEnum = z.enum([
+  'school', 
+  'gentle', 
+  'classic', 
+  'cheerful', 
+  'attention', 
+  'digital'
+]);
+
+export const BellSettingsSchema = z.object({
+  sound: BellSoundEnum,
+  volume: z.number().min(0).max(100),
 });
 
-// Defines the structure for a school, including its settings and content
+export const ScheduleItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+});
+
+export const BoardItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  imageUrl: z.string(),
+  imageHint: z.string().optional(),
+});
+
+export const AppSettingsSchema = z.object({
+  colors: z.object({
+    primary: z.string(),
+    background: z.string(),
+    accent: z.string(),
+  }),
+  soundEnabled: z.boolean(),
+  bellSound: BellSoundEnum, // Use the enum here
+});
+
 export const SchoolSchema = z.object({
   name: z.string(),
   logo: z.string().url().optional(),
@@ -17,24 +48,13 @@ export const SchoolSchema = z.object({
     backgroundColor: z.string(),
     accentColor: z.string(),
   }),
-  schedule: z.array(z.object({
-    time: z.string(),
-    event: z.string(),
-  })),
-  bellSettings: z.object({
-    sound: z.string().url(),
-    volume: z.number().min(0).max(100),
-  }),
+  schedule: z.array(ScheduleItemSchema),
+  bellSettings: BellSettingsSchema,
   infoBoard: z.object({
     content: z.string(),
-    // Add other info board related fields here
   }),
-  refreshInterval: z.enum(['5', '10', '20']),
+  refreshInterval: z.string(), 
+  adminPassword: z.string(),
 });
 
-// Defines the structure for a regular admin user associated with a school
-export const AdminSchema = z.object({
-  email: z.string().email(),
-  name: z.string(),
-  schoolId: z.string(),
-});
+export const SchoolFormDataSchema = SchoolSchema.omit({ adminPassword: true });
