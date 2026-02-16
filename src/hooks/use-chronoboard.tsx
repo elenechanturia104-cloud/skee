@@ -2,11 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { AppSettings, ScheduleItem, AdminLog, School } from '@/lib/types';
-import { useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-
-const ADMIN_PIN = '1234';
 
 const defaultSettings: AppSettings = {
   colors: {
@@ -23,9 +20,6 @@ interface ChronoBoardContextType {
   setSchedule: React.Dispatch<React.SetStateAction<ScheduleItem[]>>;
   settings: AppSettings;
   setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
-  isAuthenticated: boolean;
-  login: (pin: string) => boolean;
-  logout: () => void;
   applyColorSettings: (colors: AppSettings['colors']) => void;
   resetColorSettings: () => void;
   isBreakTime: boolean;
@@ -39,11 +33,8 @@ interface ChronoBoardContextType {
 const ChronoBoardContext = createContext<ChronoBoardContextType | undefined>(undefined);
 
 export const ChronoBoardProvider = ({ children, schoolId }: { children: ReactNode, schoolId: string }) => {
-  const router = useRouter();
-
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [logs, setLogs] = useState<AdminLog[]>([]);
   const [isClientHydrated, setIsClientHydrated] = useState(false);
@@ -132,31 +123,11 @@ export const ChronoBoardProvider = ({ children, schoolId }: { children: ReactNod
     setSettings(prev => ({...prev, colors: defaultSettings.colors}));
   }, []);
 
-
-  const login = (pin: string) => {
-    if (pin === ADMIN_PIN) {
-      setIsAuthenticated(true);
-      addLog('ავტორიზაცია', 'ადმინისტრატორი შემოვიდა.');
-      router.push(`/admin?schoolId=${schoolId}`);
-      return true;
-    }
-    return false;
-  };
-
-  const logout = () => {
-    addLog('ავტორიზაცია', 'ადმინისტრატორი გავიდა.');
-    setIsAuthenticated(false);
-    router.push(`/school/${schoolId}`);
-  };
-
   const value = {
     schedule,
     setSchedule,
     settings,
     setSettings,
-    isAuthenticated,
-    login,
-    logout,
     applyColorSettings,
     resetColorSettings,
     isBreakTime,

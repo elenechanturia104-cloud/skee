@@ -1,23 +1,33 @@
 'use client';
 
-import { useChronoBoard } from '@/hooks/use-chronoboard';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import LoadingScreen from '@/components/loader/loading-screen';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useChronoBoard();
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth(); // Get isLoading state
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/');
+    // If loading is finished and user is not authenticated, then redirect.
+    if (!isLoading && !isAuthenticated) {
+      router.push('/admin/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (!isAuthenticated) {
-    // Or a loading spinner
-    return null;
+  // While loading, show the loading screen.
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
-  return <>{children}</>;
-}
+  // If authenticated, render the children.
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
+
+  // If not authenticated and not loading, render null while redirecting.
+  return null;
+};
+
+export default ProtectedRoute;
